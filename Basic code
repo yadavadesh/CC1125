@@ -224,7 +224,7 @@ void receivedata(unsigned char *data)
 */
 
 //Variables
-uint8_t status;
+uint8_t status, data;
 
 
 void SPI_MASTER_Init(void)
@@ -254,14 +254,20 @@ uint8_t SPI_MASTER_Rec(void)
 
 int main(void)
 {
-    /* Replace with your application code */
-	SPI_MASTER_Init();
-	DDRF=0xFF;
-	PORTB &= ~(1<<PB0);
-	SPI_MASTER_Trans(WRITE_SINGLE|IOCFG3);
-	status = SPI_MASTER_Rec();
-	SPI_MASTER_Trans(0xB0);
-	
+    SPI_MASTER_Init();
+    DDRF=0xFF;
+    PORTB &= ~(1<<PB0);
+    SPI_MASTER_Trans(WRITE_SINGLE|IOCFG3);
+    status = SPI_MASTER_Rec();
+    _delay_ms(50);
+    SPI_MASTER_Trans(0xB0);
+    status = SPI_MASTER_Rec();
+    _delay_ms(50);
+
+    SPI_MASTER_Trans(READ_SINGLE|IOCFG3);
+    status = SPI_MASTER_Rec();
+    _delay_ms(50);
+    data = SPI_MASTER_Rec();
     while (1) 
     {
     }
