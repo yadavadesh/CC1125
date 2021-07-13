@@ -215,7 +215,7 @@ struct register_setting
 
 //Variables
 uint8_t status, temp, data;
-//register_setting initial_setting[];
+/*register_setting initial_setting[]={};*/
 
 //Functions
 void commandstrobe(uint8_t addr)
@@ -307,7 +307,10 @@ void SPI_MASTER_Init(void)
 
 void CC1125_Init()
 {
-	
+	commandstrobe(SRES);
+	commandstrobe(SFRX);
+	commandstrobe(SFTX);
+	/*Write the registers with initial_setting[]*/
 }
 
 void ADC_Init(void)
@@ -320,17 +323,10 @@ void ADC_Init(void)
 
 int main(void)
 {
-    /* Replace with your application code */
-	SPI_MASTER_Init();
+    SPI_MASTER_Init();
 	DDRF = 0xFF;
-	commandstrobe(SRES);
-	commandstrobe(SFRX);
-	commandstrobe(SFTX);
-	write_reg(IOCFG3, 0xB0);
-	read_reg(IOCFG3);
-	PORTF = status;
-	_delay_ms(50);
-	PORTF = data;
+	CC1125_Init();
+	/* Replace with your application code */
 	while (1) 
     {
     }
