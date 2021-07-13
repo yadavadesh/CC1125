@@ -207,25 +207,17 @@
 #define READ_SINGLE       0x80
 #define READ_BURST        0xC0
 
-//Functions
-/*
-char read_reg(unsigned char addr)
-
-void write_reg(unsigned char addr,unsigned char data)
-
-void commandstrobe(unsigned char addr)
-
-void init_cc1125()
-
-char readdirectFIFO(unsigned char addr)
-
-void receivedata(unsigned char *data)
-
-*/
+struct register_setting
+{
+	uint16_t addr;
+	uint8_t value;
+};
 
 //Variables
 uint8_t status, temp, data;
+//register_setting initial_setting[];
 
+//Functions
 void commandstrobe(uint8_t addr)
 {
 	PORTB &= ~(1<<PB0);
@@ -235,13 +227,27 @@ void commandstrobe(uint8_t addr)
 	PORTB |= (1<<PB0);
 }
 
-void write_reg(uint16_t addr, uint8_t data)
-{
+void write_reg(uint16_t addr, uint8_t value)
+{	
 	PORTB &= ~(1<<PB0);
-	SPDR = (addr | WRITE_SINGLE);
-	while(!(SPSR & 0x80));
-	status = SPDR;
-	SPDR = data;
+	//sending address
+	if(addr<=0x002E)
+	{
+		SPDR = (addr | WRITE_SINGLE);
+		while(!(SPSR & 0x80));
+		status = SPDR;
+	}
+	else
+	{
+		SPDR = ((addr>>8) | WRITE_SINGLE);
+		while(!(SPSR & 0x80));
+		status = SPDR;
+		SPDR = addr;
+		while(!(SPSR & 0x80));
+		status = SPDR;
+	}
+	//sending value	
+	SPDR = value;
 	while(!(SPSR & 0x80));
 	status = SPDR;	
 	PORTB |= (1<<PB0);
@@ -250,9 +256,23 @@ void write_reg(uint16_t addr, uint8_t data)
 void read_reg(uint16_t addr)
 {
 	PORTB &= ~(1<<PB0);
-	SPDR = (addr | READ_SINGLE);
-	while(!(SPSR & 0x80));
-	status = SPDR;
+	//sending address
+	if(addr<=0x002E)
+	{
+		SPDR = (addr | READ_SINGLE);
+		while(!(SPSR & 0x80));
+		status = SPDR;
+	}
+	else
+	{
+		SPDR = ((addr>>8) | READ_SINGLE);
+		while(!(SPSR & 0x80));
+		status = SPDR;
+		SPDR = addr;
+		while(!(SPSR & 0x80));
+		status = SPDR;
+	}
+	//receiving value
 	SPDR = 0x00;
 	while(!(SPSR & 0x80));
 	data = SPDR;
