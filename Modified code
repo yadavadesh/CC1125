@@ -224,7 +224,7 @@ void receivedata(unsigned char *data)
 */
 
 //Variables
-uint8_t status, data;
+uint8_t status, temp, data;
 
 void commandstrobe(uint8_t addr)
 {
@@ -259,6 +259,23 @@ void read_reg(uint16_t addr)
 	PORTB |= (1<<PB0);
 }
 
+void get_temp(void)
+{
+	write_reg(IOCFG1, 0x80);
+	write_reg(ATEST, 0x2A);
+	write_reg(ATEST_MODE, 0x0C);
+	write_reg(GBIAS1, 0x07);
+	ADCSRA |= (1<<ADSC);
+	while(!(ADCSRA & (1<<ADIF)));
+	temp = ADCH;
+	/*Reset the registers to initial values
+	write_reg(IOCFG1, );
+	write_reg(ATEST, );
+	write_reg(ATEST_MODE, );
+	write_reg(GBIAS1, );
+	*/	
+}
+
 void SPI_MASTER_Init(void)
 {
 	/*Set MOSI, SCK and SS as output*/
@@ -266,6 +283,19 @@ void SPI_MASTER_Init(void)
 	PORTB |= (1<<PB0);
 	/*Enable SPI, master, clk rate fck/16*/
 	SPCR = 0x51;
+}
+
+void CC1125_Init()
+{
+	
+}
+
+void ADC_Init(void)
+{
+	/*enabling adc and setting prescaler to 16*/
+	ADCSRA |= (1<<ADEN)|(1<<ADPS2)|(1<<ADFR);
+	/*selecting ADC0 channel, left adjusting result*/
+	ADMUX |= (1<<ADLAR);
 }
 
 int main(void)
@@ -284,4 +314,5 @@ int main(void)
 	while (1) 
     {
     }
+	return 0;
 }
